@@ -22,7 +22,10 @@ const Index = () => {
   const [language, setLanguage] = useState<Language>("sw");
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [history, setHistory] = useState<GestureKey[]>([]);
+  const [selected, setSelected] = useState<GestureKey | null>(null);
   const lastSpokenRef = useRef<GestureKey | null>(null);
+  const demoMode = status === "error";
+  const activeGesture = gesture ?? selected;
 
   // Auto-speak on detection change
   useEffect(() => {
@@ -38,12 +41,16 @@ const Index = () => {
 
   const speakCurrent = useCallback(
     (key?: GestureKey) => {
-      const target = key ?? gesture;
+      const target = key ?? activeGesture;
       if (!target) return;
+      if (key) {
+        setSelected(key);
+        setHistory((h) => [key, ...h.filter((x) => x !== key)].slice(0, 5));
+      }
       const p = MEDICAL_PHRASES[target];
       speak(language === "sw" ? p.swahili : p.english, language);
     },
-    [gesture, language, speak]
+    [activeGesture, language, speak]
   );
 
   // Welcome toast
@@ -103,10 +110,16 @@ const Index = () => {
               ref={videoRef}
               status={status}
               error={error}
-              gesture={gesture}
-              confidence={confidence}
+              gesture={activeGesture}
+              confidence={gesture ? confidence : selected ? 1 : 0}
               language={language}
             />
+            {demoMode && (
+              <div className="glass rounded-2xl p-3 border border-warning/40 bg-warning/5 text-sm text-foreground/90">
+                <span className="font-semibold text-warning">Demo Mode:</span>{" "}
+                No camera detected. Tap any medical phrase on the right to test the voice translation.
+              </div>
+            )}
 
             {/* Recent history */}
             <div className="glass rounded-2xl p-4">
@@ -143,7 +156,7 @@ const Index = () => {
 
             <button
               onClick={() => speakCurrent()}
-              disabled={!gesture || !ttsSupported}
+              disabled={!activeGesture || !ttsSupported}
               className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl
                 bg-warning text-warning-foreground font-bold text-lg shadow-lg
                 transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95
@@ -166,7 +179,7 @@ const Index = () => {
               />
             </label>
 
-            <PhrasesList language={language} current={gesture} onSelect={speakCurrent} />
+            <PhrasesList language={language} current={activeGesture} onSelect={speakCurrent} />
           </div>
         </div>
 

@@ -29,11 +29,16 @@ export function useCamera() {
         }
       } catch (e: any) {
         console.error("Camera error", e);
-        setError(
-          e?.name === "NotAllowedError"
-            ? "Camera permission denied. Please allow camera access in your browser settings."
-            : "Unable to access camera. Please check your device."
-        );
+        const name = e?.name;
+        let msg = "Unable to access camera. Please check your device.";
+        if (name === "NotAllowedError") {
+          msg = "Camera permission denied. Please allow camera access in your browser settings.";
+        } else if (name === "NotFoundError" || name === "DevicesNotFoundError") {
+          msg = "No camera detected on this device. You can still use Demo Mode — tap any phrase below to hear it spoken.";
+        } else if (name === "NotReadableError" || name === "TrackStartError") {
+          msg = "Camera is already in use by another application. Please close it and refresh.";
+        }
+        setError(msg);
         setStatus("error");
       }
     }
