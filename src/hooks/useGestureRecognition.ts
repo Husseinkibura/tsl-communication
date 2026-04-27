@@ -5,7 +5,6 @@ import { GestureKey, Landmark } from "@/types";
 declare global {
   interface Window {
     Hands: any;
-    Camera: any;
   }
 }
 
@@ -48,10 +47,16 @@ export function useGestureRecognition(
         await loadScript(MEDIAPIPE_HANDS);
         if (cancelled) return;
 
+        // Check if Hands is available
+        if (!window.Hands) {
+          throw new Error("MediaPipe Hands not available");
+        }
+
         const hands = new window.Hands({
           locateFile: (file: string) =>
             `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`,
         });
+        
         hands.setOptions({
           maxNumHands: 2,
           modelComplexity: 1,
@@ -77,6 +82,7 @@ export function useGestureRecognition(
 
         handsRef.current = hands;
         setReady(true);
+        setError(null);
 
         const process = async () => {
           if (cancelled) return;
@@ -93,7 +99,8 @@ export function useGestureRecognition(
         process();
       } catch (e: any) {
         console.error("MediaPipe load error", e);
-        setError("Failed to load hand tracking model. Please refresh.");
+        setError("Failed to load hand tracking model. Please refresh. Using Demo Mode.");
+        setReady(false);
       }
     })();
 

@@ -111,9 +111,10 @@ const Index = () => {
               status={status}
               error={error}
               gesture={activeGesture}
-              confidence={gesture ? confidence : selected ? 1 : 0}
+              confidence={gesture ? confidence : selected ? 0.95 : 0}
               language={language}
             />
+            
             {demoMode && (
               <div className="glass rounded-2xl p-3 border border-warning/40 bg-warning/5 text-sm text-foreground/90">
                 <span className="font-semibold text-warning">Demo Mode:</span>{" "}
