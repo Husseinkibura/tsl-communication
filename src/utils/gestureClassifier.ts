@@ -1,6 +1,5 @@
 import { GestureKey, Landmark, DetectionResult } from "@/types";
 
-// MediaPipe Hand landmark indices
 const TIPS = { thumb: 4, index: 8, middle: 12, ring: 16, pinky: 20 };
 const PIPS = { index: 6, middle: 10, ring: 14, pinky: 18 };
 const MCPS = { index: 5, middle: 9, ring: 13, pinky: 17 };
@@ -17,7 +16,6 @@ interface FingerStates {
 }
 
 function getFingerStates(lm: Landmark[]): FingerStates {
-  // Finger extended if tip is above PIP (lower y in image coords)
   return {
     thumb: Math.abs(lm[TIPS.thumb].x - lm[MCPS.index].x) > 0.08,
     index: lm[TIPS.index].y < lm[PIPS.index].y - 0.02,
@@ -37,12 +35,10 @@ function classifySingleHand(lm: Landmark[]): DetectionResult {
   const palmSize = dist(lm[0], lm[MCPS.middle]);
   const normalizedSpan = palmSize > 0 ? handSpan / palmSize : 0;
 
-  // EMERGENCY: all fingers spread wide
   if (f.thumb && f.index && f.middle && f.ring && f.pinky && normalizedSpan > 1.4) {
     return { gesture: "emergency", confidence: Math.min(1, normalizedSpan / 2) };
   }
 
-  // THANK_YOU: all fingertips close together
   const tips = [lm[TIPS.thumb], lm[TIPS.index], lm[TIPS.middle], lm[TIPS.ring], lm[TIPS.pinky]];
   const cx = tips.reduce((s, p) => s + p.x, 0) / 5;
   const cy = tips.reduce((s, p) => s + p.y, 0) / 5;
@@ -51,31 +47,25 @@ function classifySingleHand(lm: Landmark[]): DetectionResult {
     return { gesture: "thank_you", confidence: 0.85 };
   }
 
-  // MEDICINE: open hand with thumb tip near index tip (OK-ish)
   if (f.middle && f.ring && f.pinky && thumbIndexDist < 0.06) {
     return { gesture: "medicine", confidence: 0.85 };
   }
 
-  // STOMACH: open palm, all 5 fingers extended (not wide spread)
   if (f.thumb && f.index && f.middle && f.ring && f.pinky && normalizedSpan <= 1.4) {
     return { gesture: "stomach", confidence: 0.8 };
   }
 
-  // ALLERGY / HELP / DIABETES: V-sign family (index + middle extended, ring/pinky curled)
   if (f.index && f.middle && !f.ring && !f.pinky) {
     if (indexMiddleDist < 0.05) {
       return { gesture: "help", confidence: 0.85 };
     }
-    // Wide V => allergy
     if (indexMiddleDist > 0.09) {
       return { gesture: "allergy", confidence: 0.85 };
     }
     return { gesture: "diabetes", confidence: 0.75 };
   }
 
-  // PAIN / HEADACHE: only index extended
   if (f.index && !f.middle && !f.ring && !f.pinky) {
-    // Headache: pointing upward (tip clearly above wrist)
     const pointingUp = lm[TIPS.index].y < lm[0].y - 0.15;
     if (pointingUp) {
       return { gesture: "headache", confidence: 0.85 };
@@ -83,12 +73,10 @@ function classifySingleHand(lm: Landmark[]): DetectionResult {
     return { gesture: "pain", confidence: 0.9 };
   }
 
-  // FEVER: fist with thumb extended outward
   if (!f.index && !f.middle && !f.ring && !f.pinky && f.thumb) {
     return { gesture: "fever", confidence: 0.85 };
   }
 
-  // THIRSTY: C-shape — thumb & index curved, others curled
   if (!f.middle && !f.ring && !f.pinky && thumbIndexDist > 0.08 && thumbIndexDist < 0.18) {
     return { gesture: "thirsty", confidence: 0.7 };
   }
@@ -99,7 +87,6 @@ function classifySingleHand(lm: Landmark[]): DetectionResult {
 export function classifyGesture(hands: Landmark[][]): DetectionResult {
   if (!hands || hands.length === 0) return { gesture: null, confidence: 0 };
 
-  // PREGNANCY: two hands detected forming a circle around belly area
   if (hands.length >= 2) {
     return { gesture: "pregnancy", confidence: 0.8 };
   }
@@ -107,7 +94,6 @@ export function classifyGesture(hands: Landmark[][]): DetectionResult {
   return classifySingleHand(hands[0]);
 }
 
-// Stability buffer
 export class StabilityBuffer {
   private buffer: (GestureKey | null)[] = [];
   private size: number;

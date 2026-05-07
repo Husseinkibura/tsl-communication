@@ -88,12 +88,7 @@ const Index = () => {
       </div>
 
       <div className="container mx-auto px-4 py-6 sm:py-8 max-w-7xl">
-        {/* Header */}
         <header className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 mb-3 text-xs font-medium text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
-            Project I — NTA Level 8 | 2025/2026
-          </div>
           <h1 className="text-3xl sm:text-5xl font-bold mb-2">
             🤟 <span className="text-gradient">TSL Medical Translator</span>
           </h1>
@@ -102,9 +97,7 @@ const Index = () => {
           </p>
         </header>
 
-        {/* Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-          {/* Camera column */}
           <div className="lg:col-span-2 space-y-4">
             <Camera
               ref={videoRef}
@@ -122,7 +115,6 @@ const Index = () => {
               </div>
             )}
 
-            {/* Recent history */}
             <div className="glass rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <History className="h-4 w-4 text-primary" />
@@ -150,7 +142,6 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Controls column */}
           <div className="space-y-4">
             <StatusIndicator status={status} modelReady={ready} fps={fps} error={modelError} />
             <LanguageToggle language={language} onChange={setLanguage} />
@@ -189,12 +180,12 @@ const Index = () => {
           <p className="font-semibold text-foreground/80">
             Dar es Salaam Institute of Technology (DIT)
           </p>
-          <p>Department of Computer Studies · NTA Level 8 · Academic Year 2025/2026</p>
+          {/* <p>Department of Computer Studies · NTA Level 8 · Academic Year 2025/2026</p>
           <p>
             Student: <span className="text-foreground/80 font-medium">ZAITUN SAID GHASIA</span>
             {" · "}
             Supervisor: <span className="text-foreground/80 font-medium">MR. DENIS SHIJA</span>
-          </p>
+          </p> */}
         </footer>
       </div>
     </div>
