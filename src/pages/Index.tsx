@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera } from "@/components/Camera";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { PhrasesList } from "@/components/PhrasesList";
@@ -8,7 +8,7 @@ import { useGestureRecognition } from "@/hooks/useGestureRecognition";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { GestureKey, Language } from "@/types";
 import { MEDICAL_PHRASES } from "@/utils/medicalPhrases";
-import { Volume2, History, Sparkles } from "lucide-react";
+import { History } from "lucide-react";
 import { toast } from "sonner";
 
 const Index = () => {
@@ -17,82 +17,58 @@ const Index = () => {
     videoRef,
     status === "ready"
   );
-  const { speak, supported: ttsSupported } = useTextToSpeech();
+  const { speak } = useTextToSpeech();
 
   const [language, setLanguage] = useState<Language>("sw");
-  const [autoSpeak, setAutoSpeak] = useState(true);
   const [history, setHistory] = useState<GestureKey[]>([]);
-  const [selected, setSelected] = useState<GestureKey | null>(null);
   const lastSpokenRef = useRef<GestureKey | null>(null);
-  const demoMode = status === "error";
-  const activeGesture = gesture ?? selected;
+  const cameraUnavailable = status === "error";
 
-  // Auto-speak on detection change
+  // Auto-speak only when camera detects a gesture
   useEffect(() => {
     if (!gesture) return;
     if (lastSpokenRef.current === gesture) return;
     lastSpokenRef.current = gesture;
     setHistory((h) => [gesture, ...h.filter((x) => x !== gesture)].slice(0, 5));
-    if (autoSpeak) {
-      const phrase = MEDICAL_PHRASES[gesture];
-      speak(language === "sw" ? phrase.swahili : phrase.english, language);
-    }
-  }, [gesture, autoSpeak, language, speak]);
+    const phrase = MEDICAL_PHRASES[gesture];
+    speak(language === "sw" ? phrase.swahili : phrase.english, language);
+  }, [gesture, language, speak]);
 
-  const speakCurrent = useCallback(
-    (key?: GestureKey) => {
-      const target = key ?? activeGesture;
-      if (!target) return;
-      if (key) {
-        setSelected(key);
-        setHistory((h) => [key, ...h.filter((x) => x !== key)].slice(0, 5));
-      }
-      const p = MEDICAL_PHRASES[target];
-      speak(language === "sw" ? p.swahili : p.english, language);
-    },
-    [activeGesture, language, speak]
-  );
-
-  // Welcome toast
   useEffect(() => {
     toast.success("Karibu! Welcome to TSL Medical Translator", {
-      description: "Press SPACE to speak • Press L to switch language",
+      description: "Show a TSL sign in front of the camera to hear it spoken aloud.",
       duration: 5000,
     });
   }, []);
 
-  // Keyboard shortcuts
+  // Keyboard shortcut: L to switch language
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
-      if (e.code === "Space") {
-        e.preventDefault();
-        speakCurrent();
-      } else if (e.key.toLowerCase() === "l") {
+      if (e.key.toLowerCase() === "l") {
         setLanguage((l) => (l === "sw" ? "en" : "sw"));
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [speakCurrent]);
+  }, []);
 
   return (
     <div className="min-h-screen text-foreground">
-      {/* Decorative blobs */}
       <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-primary/20 blur-3xl animate-float" />
+        <div className="absolute -top-40 -left-40 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-primary/20 blur-3xl animate-float" />
         <div
-          className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-accent/20 blur-3xl animate-float"
+          className="absolute -bottom-40 -right-40 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-accent/20 blur-3xl animate-float"
           style={{ animationDelay: "3s" }}
         />
       </div>
 
-      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-7xl">
-        <header className="text-center mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-5xl font-bold mb-2">
-            🤟 <span className="text-gradient">TSL Medical Translator</span>
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
+        <header className="text-center mb-5 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-2">
+            <span className="text-gradient">TSL Medical Translator</span>
           </h1>
-          <p className="text-sm sm:text-base text-foreground/70">
+          <p className="text-xs sm:text-base text-foreground/70 px-2">
             Tanzanian Sign Language to Voice · Medical Communication System
           </p>
         </header>
@@ -103,38 +79,39 @@ const Index = () => {
               ref={videoRef}
               status={status}
               error={error}
-              gesture={activeGesture}
-              confidence={gesture ? confidence : selected ? 0.95 : 0}
+              gesture={gesture}
+              confidence={confidence}
               language={language}
             />
-            
-            {demoMode && (
-              <div className="glass rounded-2xl p-3 border border-warning/40 bg-warning/5 text-sm text-foreground/90">
-                <span className="font-semibold text-warning">Demo Mode:</span>{" "}
-                No camera detected. Tap any medical phrase on the right to test the voice translation.
+
+            {cameraUnavailable && (
+              <div className="glass rounded-2xl p-3 border border-warning/40 bg-warning/5 text-xs sm:text-sm text-foreground/90">
+                <span className="font-semibold text-warning">Camera Required:</span>{" "}
+                Enable a camera so the system can detect TSL signs. Voice translation
+                only plays when a gesture is recognised from the live video feed.
               </div>
             )}
 
-            <div className="glass rounded-2xl p-4">
+            <div className="glass rounded-2xl p-3 sm:p-4">
               <div className="flex items-center gap-2 mb-3">
                 <History className="h-4 w-4 text-primary" />
                 <h3 className="text-sm font-semibold text-foreground/80">Recent Detections</h3>
               </div>
               {history.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No gestures detected yet.</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  No gestures detected yet.
+                </p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {history.map((g, i) => {
                     const p = MEDICAL_PHRASES[g];
                     return (
-                      <button
+                      <div
                         key={`${g}-${i}`}
-                        onClick={() => speakCurrent(g)}
-                        className="flex items-center gap-2 bg-white/5 hover:bg-white/10 rounded-full pl-2 pr-3 py-1.5 text-sm transition-all hover:scale-105"
+                        className="bg-white/5 rounded-full px-3 py-1.5 text-xs sm:text-sm font-medium"
                       >
-                        <span className="text-lg">{p.icon}</span>
-                        <span className="font-medium">{p.label}</span>
-                      </button>
+                        {p.label}
+                      </div>
                     );
                   })}
                 </div>
@@ -145,47 +122,14 @@ const Index = () => {
           <div className="space-y-4">
             <StatusIndicator status={status} modelReady={ready} fps={fps} error={modelError} />
             <LanguageToggle language={language} onChange={setLanguage} />
-
-            <button
-              onClick={() => speakCurrent()}
-              disabled={!activeGesture || !ttsSupported}
-              className="w-full flex items-center justify-center gap-3 py-4 rounded-2xl
-                bg-warning text-warning-foreground font-bold text-lg shadow-lg
-                transition-all hover:scale-[1.02] hover:brightness-110 active:scale-95
-                disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100"
-            >
-              <Volume2 className="h-5 w-5" />
-              SPEAK GESTURE
-            </button>
-
-            <label className="glass rounded-2xl p-3 flex items-center justify-between cursor-pointer">
-              <div>
-                <div className="text-sm font-semibold">Auto-speak</div>
-                <div className="text-xs text-muted-foreground">Speak when gesture detected</div>
-              </div>
-              <input
-                type="checkbox"
-                checked={autoSpeak}
-                onChange={(e) => setAutoSpeak(e.target.checked)}
-                className="h-5 w-5 accent-primary cursor-pointer"
-              />
-            </label>
-
-            <PhrasesList language={language} current={activeGesture} onSelect={speakCurrent} />
+            <PhrasesList language={language} current={gesture} />
           </div>
         </div>
 
-        {/* Footer */}
-        <footer className="mt-10 pt-6 border-t border-white/10 text-center text-xs sm:text-sm text-foreground/60 space-y-1">
+        <footer className="mt-8 sm:mt-10 pt-6 border-t border-white/10 text-center text-xs sm:text-sm text-foreground/60">
           <p className="font-semibold text-foreground/80">
             Dar es Salaam Institute of Technology (DIT)
           </p>
-          {/* <p>Department of Computer Studies · NTA Level 8 · Academic Year 2025/2026</p>
-          <p>
-            Student: <span className="text-foreground/80 font-medium">ZAITUN SAID GHASIA</span>
-            {" · "}
-            Supervisor: <span className="text-foreground/80 font-medium">MR. DENIS SHIJA</span>
-          </p> */}
         </footer>
       </div>
     </div>
