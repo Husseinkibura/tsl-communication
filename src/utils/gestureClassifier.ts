@@ -3,105 +3,296 @@ import { GestureKey, Landmark, DetectionResult } from "@/types";
 const TIPS = { thumb: 4, index: 8, middle: 12, ring: 16, pinky: 20 };
 const PIPS = { index: 6, middle: 10, ring: 14, pinky: 18 };
 const MCPS = { index: 5, middle: 9, ring: 13, pinky: 17 };
+const WRIST = 0;
 
-const dist = (a: Landmark, b: Landmark) =>
-  Math.hypot(a.x - b.x, a.y - b.y);
+const dist = (a: Landmark, b: Landmark) => Math.hypot(a.x - b.x, a.y - b.y);
 
 interface FingerStates {
-  thumb: boolean;
-  index: boolean;
-  middle: boolean;
-  ring: boolean;
-  pinky: boolean;
+  thumb: 0 | 1;
+  index: 0 | 1;
+  middle: 0 | 1;
+  ring: 0 | 1;
+  pinky: 0 | 1;
 }
 
 function getFingerStates(lm: Landmark[]): FingerStates {
   return {
-    thumb: Math.abs(lm[TIPS.thumb].x - lm[MCPS.index].x) > 0.08,
-    index: lm[TIPS.index].y < lm[PIPS.index].y - 0.02,
-    middle: lm[TIPS.middle].y < lm[PIPS.middle].y - 0.02,
-    ring: lm[TIPS.ring].y < lm[PIPS.ring].y - 0.02,
-    pinky: lm[TIPS.pinky].y < lm[PIPS.pinky].y - 0.02,
+    thumb: Math.abs(lm[TIPS.thumb].x - lm[MCPS.index].x) > 0.07 ? 1 : 0,
+    index: lm[TIPS.index].y < lm[PIPS.index].y - 0.02 ? 1 : 0,
+    middle: lm[TIPS.middle].y < lm[PIPS.middle].y - 0.02 ? 1 : 0,
+    ring: lm[TIPS.ring].y < lm[PIPS.ring].y - 0.02 ? 1 : 0,
+    pinky: lm[TIPS.pinky].y < lm[PIPS.pinky].y - 0.02 ? 1 : 0,
   };
 }
 
+// Orientation of hand based on wrist -> middle MCP vector
+// U=up, D=down, L=left, R=right
+function getOrientation(lm: Landmark[]): "U" | "D" | "L" | "R" {
+  const dx = lm[MCPS.middle].x - lm[WRIST].x;
+  const dy = lm[MCPS.middle].y - lm[WRIST].y;
+  if (Math.abs(dy) >= Math.abs(dx)) return dy < 0 ? "U" : "D";
+  return dx < 0 ? "L" : "R";
+}
+
+function patternKey(f: FingerStates): string {
+  return `${f.thumb}${f.index}${f.middle}${f.ring}${f.pinky}`;
+}
+
+// Map: `${pattern}_${orientation}` -> gesture
+// Pattern bits: thumb,index,middle,ring,pinky (1=extended)
+const SINGLE_HAND_MAP: Record<string, GestureKey> = {
+  // Index pointing
+  "01000_U": "headache",     // point up
+  "01000_D": "pain",         // point down
+  "01000_L": "stop",
+  "01000_R": "stop",
+
+  // Index + middle (V / peace)
+  "01100_U": "help",
+  "01100_D": "diabetes",
+  "01100_L": "wait",
+  "01100_R": "wait",
+
+  // Index + middle + ring (3)
+  "01110_U": "doctor",
+  "01110_D": "nurse",
+  "01110_L": "nurse",
+  "01110_R": "nurse",
+
+  // All four fingers (no thumb)
+  "01111_U": "hospital",
+  "01111_D": "vomit",
+  "01111_L": "wheelchair",
+  "01111_R": "wheelchair",
+
+  // Open palm (all 5)
+  "11111_U": "hello",
+  "11111_D": "blood",
+  "11111_L": "goodbye",
+  "11111_R": "goodbye",
+
+  // Fist (none)
+  "00000_U": "yes",
+  "00000_D": "fever",
+  "00000_L": "yes",
+  "00000_R": "yes",
+
+  // Thumb only (thumbs up/down)
+  "10000_U": "happy",
+  "10000_D": "sad",
+  "10000_L": "happy",
+  "10000_R": "happy",
+
+  // Pinky only
+  "00001_U": "thirsty",
+  "00001_D": "thirsty",
+  "00001_L": "thirsty",
+  "00001_R": "thirsty",
+
+  // Index + pinky (rock)
+  "01001_U": "sick",
+  "01001_D": "sick",
+  "01001_L": "sick",
+  "01001_R": "sick",
+
+  // Thumb + index + pinky (ILY / call)
+  "11001_U": "ambulance",
+  "11001_D": "ambulance",
+  "11001_L": "ambulance",
+  "11001_R": "ambulance",
+
+  // Thumb + pinky (phone / shaka)
+  "10001_U": "please",
+  "10001_D": "please",
+  "10001_L": "please",
+  "10001_R": "please",
+
+  // Thumb + index (L / gun)
+  "11000_U": "injection",
+  "11000_D": "injection",
+  "11000_L": "injection",
+  "11000_R": "injection",
+
+  // Thumb + index + middle
+  "11100_U": "medicine",
+  "11100_D": "medicine",
+  "11100_L": "medicine",
+  "11100_R": "medicine",
+
+  // Thumb + index + middle + ring
+  "11110_U": "xray",
+  "11110_D": "xray",
+  "11110_L": "xray",
+  "11110_R": "xray",
+
+  // Middle finger only
+  "00100_U": "no",
+  "00100_D": "no",
+  "00100_L": "no",
+  "00100_R": "no",
+
+  // Ring + pinky
+  "00011_U": "tired",
+  "00011_D": "tired",
+  "00011_L": "tired",
+  "00011_R": "tired",
+
+  // Middle + ring + pinky (no index)
+  "00111_U": "sneeze",
+  "00111_D": "sneeze",
+  "00111_L": "sneeze",
+  "00111_R": "sneeze",
+
+  // Index + middle + pinky
+  "01101_U": "cough",
+  "01101_D": "cough",
+  "01101_L": "cough",
+  "01101_R": "cough",
+
+  // Index + ring + pinky
+  "01011_U": "dizzy",
+  "01011_D": "dizzy",
+  "01011_L": "dizzy",
+  "01011_R": "dizzy",
+
+  // Thumb + middle
+  "10100_U": "allergy",
+  "10100_D": "allergy",
+  "10100_L": "allergy",
+  "10100_R": "allergy",
+
+  // Thumb + ring
+  "10010_U": "bandage",
+  "10010_D": "bandage",
+  "10010_L": "bandage",
+  "10010_R": "bandage",
+
+  // Thumb + index + middle + pinky
+  "11101_U": "breathe",
+  "11101_D": "breathe",
+  "11101_L": "breathe",
+  "11101_R": "breathe",
+
+  // Thumb + index + ring + pinky
+  "11011_U": "pressure",
+  "11011_D": "pressure",
+  "11011_L": "pressure",
+  "11011_R": "pressure",
+
+  // Thumb + middle + ring + pinky
+  "10111_U": "surgery",
+  "10111_D": "surgery",
+  "10111_L": "surgery",
+  "10111_R": "surgery",
+
+  // Index + middle + ring (no thumb, no pinky) handled above
+  // Ring only
+  "00010_U": "ear",
+  "00010_D": "ear",
+  "00010_L": "ear",
+  "00010_R": "ear",
+
+  // Thumb + middle + ring
+  "10110_U": "heart",
+  "10110_D": "heart",
+  "10110_L": "heart",
+  "10110_R": "heart",
+
+  // Thumb + ring + pinky
+  "10011_U": "sorry",
+  "10011_D": "sorry",
+  "10011_L": "sorry",
+  "10011_R": "sorry",
+
+  // Thumb + middle + pinky
+  "10101_U": "hot",
+  "10101_D": "cold",
+  "10101_L": "hot",
+  "10101_R": "hot",
+
+  // Index + middle + ring + pinky already (01111)
+  // Middle + ring
+  "00110_U": "eye",
+  "00110_D": "eye",
+  "00110_L": "eye",
+  "00110_R": "eye",
+
+  // Index + ring
+  "01010_U": "nose",
+  "01010_D": "nose",
+  "01010_L": "nose",
+  "01010_R": "nose",
+
+  // Index + pinky already
+  // Middle + pinky
+  "00101_U": "mouth",
+  "00101_D": "mouth",
+  "00101_L": "mouth",
+  "00101_R": "mouth",
+};
+
 function classifySingleHand(lm: Landmark[]): DetectionResult {
   const f = getFingerStates(lm);
-  const extendedCount = [f.index, f.middle, f.ring, f.pinky].filter(Boolean).length;
+  const orient = getOrientation(lm);
+  const key = `${patternKey(f)}_${orient}`;
+  const gesture = SINGLE_HAND_MAP[key] ?? null;
+  if (!gesture) return { gesture: null, confidence: 0 };
 
+  // Check for closed pinch (thumb+index tips close) -> emergency override
   const thumbIndexDist = dist(lm[TIPS.thumb], lm[TIPS.index]);
-  const indexMiddleDist = dist(lm[TIPS.index], lm[TIPS.middle]);
-  const handSpan = dist(lm[TIPS.thumb], lm[TIPS.pinky]);
-  const palmSize = dist(lm[0], lm[MCPS.middle]);
-  const normalizedSpan = palmSize > 0 ? handSpan / palmSize : 0;
-
-  if (f.thumb && f.index && f.middle && f.ring && f.pinky && normalizedSpan > 1.4) {
-    return { gesture: "emergency", confidence: Math.min(1, normalizedSpan / 2) };
+  const palm = dist(lm[WRIST], lm[MCPS.middle]);
+  if (palm > 0 && thumbIndexDist / palm < 0.25 && f.middle && f.ring && f.pinky) {
+    return { gesture: "emergency", confidence: 0.9 };
   }
 
-  const tips = [lm[TIPS.thumb], lm[TIPS.index], lm[TIPS.middle], lm[TIPS.ring], lm[TIPS.pinky]];
-  const cx = tips.reduce((s, p) => s + p.x, 0) / 5;
-  const cy = tips.reduce((s, p) => s + p.y, 0) / 5;
-  const avgTipSpread = tips.reduce((s, p) => s + Math.hypot(p.x - cx, p.y - cy), 0) / 5;
-  if (avgTipSpread < 0.04 && palmSize > 0.05) {
-    return { gesture: "thank_you", confidence: 0.85 };
-  }
+  return { gesture, confidence: 0.85 };
+}
 
-  if (f.middle && f.ring && f.pinky && thumbIndexDist < 0.06) {
-    return { gesture: "medicine", confidence: 0.85 };
-  }
+function classifyTwoHands(hands: Landmark[][]): DetectionResult {
+  // Use sum of extended fingers across both hands to pick from two-handed phrases
+  const totals = hands.map(getFingerStates);
+  const total = totals.reduce(
+    (s, f) => s + f.thumb + f.index + f.middle + f.ring + f.pinky,
+    0
+  );
 
-  if (f.thumb && f.index && f.middle && f.ring && f.pinky && normalizedSpan <= 1.4) {
-    return { gesture: "stomach", confidence: 0.8 };
-  }
+  // Check if hands are crossed / close (stomach, pregnancy)
+  const c0 = hands[0][MCPS.middle];
+  const c1 = hands[1][MCPS.middle];
+  const between = Math.hypot(c0.x - c1.x, c0.y - c1.y);
 
-  if (f.index && f.middle && !f.ring && !f.pinky) {
-    if (indexMiddleDist < 0.05) {
-      return { gesture: "help", confidence: 0.85 };
-    }
-    if (indexMiddleDist > 0.09) {
-      return { gesture: "allergy", confidence: 0.85 };
-    }
-    return { gesture: "diabetes", confidence: 0.75 };
-  }
+  if (between < 0.25 && total <= 4) return { gesture: "pregnancy", confidence: 0.85 };
+  if (between < 0.3 && total >= 8) return { gesture: "thank_you", confidence: 0.85 };
 
-  if (f.index && !f.middle && !f.ring && !f.pinky) {
-    const pointingUp = lm[TIPS.index].y < lm[0].y - 0.15;
-    if (pointingUp) {
-      return { gesture: "headache", confidence: 0.85 };
-    }
-    return { gesture: "pain", confidence: 0.9 };
-  }
-
-  if (!f.index && !f.middle && !f.ring && !f.pinky && f.thumb) {
-    return { gesture: "fever", confidence: 0.85 };
-  }
-
-  if (!f.middle && !f.ring && !f.pinky && thumbIndexDist > 0.08 && thumbIndexDist < 0.18) {
-    return { gesture: "thirsty", confidence: 0.7 };
-  }
-
-  return { gesture: null, confidence: 0 };
+  // Map by total extended fingers
+  const TWO_HAND: Record<number, GestureKey> = {
+    0: "sleep",
+    1: "hungry",
+    2: "water",
+    3: "food",
+    4: "hand",
+    5: "leg",
+    6: "back",
+    7: "stomach",
+    8: "hospital",
+    9: "doctor",
+    10: "help",
+  };
+  return { gesture: TWO_HAND[total] ?? "help", confidence: 0.75 };
 }
 
 export function classifyGesture(hands: Landmark[][]): DetectionResult {
   if (!hands || hands.length === 0) return { gesture: null, confidence: 0 };
-
-  if (hands.length >= 2) {
-    return { gesture: "pregnancy", confidence: 0.8 };
-  }
-
+  if (hands.length >= 2) return classifyTwoHands(hands);
   return classifySingleHand(hands[0]);
 }
 
 export class StabilityBuffer {
   private buffer: (GestureKey | null)[] = [];
   private size: number;
-
   constructor(size = 5) {
     this.size = size;
   }
-
   push(g: GestureKey | null): GestureKey | null {
     this.buffer.push(g);
     if (this.buffer.length > this.size) this.buffer.shift();
@@ -109,7 +300,6 @@ export class StabilityBuffer {
     const first = this.buffer[0];
     return this.buffer.every((x) => x === first) ? first : null;
   }
-
   reset() {
     this.buffer = [];
   }
