@@ -10,6 +10,7 @@ import { GestureKey, Language } from "@/types";
 import { MEDICAL_PHRASES } from "@/utils/medicalPhrases";
 import { History } from "lucide-react";
 import { toast } from "sonner";
+import ditLogo from "@/assets/dit-logo.png";
 
 const Index = () => {
   const { videoRef, status, error } = useCamera();
