@@ -10,6 +10,7 @@ import { GestureKey, Language } from "@/types";
 import { MEDICAL_PHRASES } from "@/utils/medicalPhrases";
 import { History } from "lucide-react";
 import { toast } from "sonner";
+import ditLogo from "@/assets/dit-logo.png";
 
 const Index = () => {
   const { videoRef, status, error } = useCamera();
@@ -65,12 +66,21 @@ const Index = () => {
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
         <header className="text-center mb-5 sm:mb-8">
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold mb-2">
-            <span className="text-gradient">TSL Medical Translator</span>
-          </h1>
-          <p className="text-xs sm:text-base text-foreground/70 px-2">
-            Tanzanian Sign Language to Voice · Medical Communication System
-          </p>
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3">
+            <img
+              src={ditLogo}
+              alt="Dar es Salaam Institute of Technology logo"
+              className="h-14 sm:h-20 w-auto drop-shadow-md"
+            />
+            <div className="text-left">
+              <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold leading-tight">
+                <span className="text-gradient">TSL Medical Translator</span>
+              </h1>
+              <p className="text-[10px] sm:text-sm text-foreground/70">
+                Tanzanian Sign Language to Voice · Medical Communication System
+              </p>
+            </div>
+          </div>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
