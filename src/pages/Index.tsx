@@ -10,7 +10,6 @@ import { GestureKey, Language } from "@/types";
 import { MEDICAL_PHRASES } from "@/utils/medicalPhrases";
 import { History } from "lucide-react";
 import { toast } from "sonner";
-import ditLogo from "@/assets/dit-logo.png";
 import chavitaLogo from "@/assets/chavita-logo.png";
 
 const Index = () => {
