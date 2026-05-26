@@ -1,4 +1,4 @@
-import { PHRASES_LIST, TSL_REFERENCE } from "@/utils/medicalPhrases";
+import { PHRASES_LIST } from "@/utils/medicalPhrases";
 import { Language, GestureKey } from "@/types";
 
 interface Props {
@@ -12,12 +12,6 @@ export function PhrasesList({ language, current }: Props) {
       <h3 className="text-sm font-semibold text-foreground/80 mb-3 px-1">
         Medical Phrases ({PHRASES_LIST.length})
       </h3>
-      <p className="text-xs text-muted-foreground mb-2 px-1">
-        Voice plays automatically when the camera detects a sign.
-      </p>
-      <p className="text-[10px] text-muted-foreground/80 mb-3 px-1 italic leading-snug">
-        {TSL_REFERENCE}
-      </p>
       <div className="space-y-1.5 max-h-[60vh] lg:max-h-[420px] overflow-y-auto pr-1">
         {PHRASES_LIST.map((p) => {
           const text = language === "sw" ? p.swahili : p.english;
