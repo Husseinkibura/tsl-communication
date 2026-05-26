@@ -286,15 +286,24 @@ export function classifyGesture(hands: Landmark[][]): DetectionResult {
 export class StabilityBuffer {
   private buffer: (GestureKey | null)[] = [];
   private size: number;
-  constructor(size = 5) {
+  constructor(size = 3) {
     this.size = size;
   }
   push(g: GestureKey | null): GestureKey | null {
     this.buffer.push(g);
     if (this.buffer.length > this.size) this.buffer.shift();
     if (this.buffer.length < this.size) return null;
-    const first = this.buffer[0];
-    return this.buffer.every((x) => x === first) ? first : null;
+    // Majority vote: return most common non-null gesture if it appears at least twice
+    const counts = new Map<GestureKey, number>();
+    for (const x of this.buffer) {
+      if (x) counts.set(x, (counts.get(x) ?? 0) + 1);
+    }
+    let best: GestureKey | null = null;
+    let bestN = 0;
+    for (const [k, v] of counts) {
+      if (v > bestN) { best = k; bestN = v; }
+    }
+    return bestN >= 2 ? best : null;
   }
   reset() {
     this.buffer = [];
