@@ -58,9 +58,10 @@ const Index = () => {
     <div className="min-h-screen text-foreground">
       {/* CHAVITA-style top band */}
       <div className="bg-primary text-primary-foreground text-[11px] sm:text-xs">
-        <div className="container mx-auto max-w-7xl px-3 sm:px-4 py-1.5 flex items-center justify-between">
-          <span className="tracking-wide uppercase">CHAVITA · Usawa na Haki</span>
-          <span className="hidden sm:inline opacity-90">Case study · Kilakala Unit for the Deaf, Morogoro</span>
+        <div className="container mx-auto max-w-7xl px-3 sm:px-4 py-1.5 flex items-center justify-end">
+          <span className="hidden sm:inline opacity-90">
+            CHAVITA · Usawa na Haki
+          </span>
         </div>
       </div>
 
@@ -70,18 +71,18 @@ const Index = () => {
           <img
             src={chavitaLogo}
             alt="CHAVITA — Tanzania Association of the Deaf logo"
-            className="h-12 sm:h-16 w-auto flex-shrink-0"
+            className="h-10 sm:h-13 w-auto flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
-            <h1
+            {/* <h1
               className="text-base sm:text-2xl lg:text-3xl font-bold text-primary leading-tight tracking-wide"
               style={{ fontFamily: '"Times New Roman", Georgia, serif' }}
             >
               TSL MEDICAL TRANSLATOR
-            </h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-[0.15em] mt-0.5">
-              Tanzanian Sign Language → Voice · Medical Communication
-            </p>
+            </h1> */}
+           <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-[0.15em] mt-0.5 text-center">
+              Tanzanian Sign Language Voice · Medical Communication
+           </p>
           </div>
         </div>
       </div>
