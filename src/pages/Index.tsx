@@ -11,6 +11,7 @@ import { MEDICAL_PHRASES } from "@/utils/medicalPhrases";
 import { History } from "lucide-react";
 import { toast } from "sonner";
 import ditLogo from "@/assets/dit-logo.png";
+import chavitaLogo from "@/assets/chavita-logo.png";
 
 const Index = () => {
   const { videoRef, status, error } = useCamera();
@@ -56,32 +57,51 @@ const Index = () => {
 
   return (
     <div className="min-h-screen text-foreground">
+      {/* CHAVITA-style top band */}
+      <div className="bg-primary text-primary-foreground text-[11px] sm:text-xs">
+        <div className="container mx-auto max-w-7xl px-3 sm:px-4 py-1.5 flex items-center justify-between">
+          <span className="tracking-wide uppercase">CHAVITA · Usawa na Haki</span>
+          <span className="hidden sm:inline opacity-90">Case study · Kilakala Unit for the Deaf, Morogoro</span>
+        </div>
+      </div>
+
+      {/* CHAVITA-style header: white, logo left, serif wordmark */}
+      <div className="border-b border-border bg-card">
+        <div className="container mx-auto max-w-7xl px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-5">
+          <img
+            src={chavitaLogo}
+            alt="CHAVITA — Tanzania Association of the Deaf logo"
+            className="h-12 sm:h-16 w-auto"
+          />
+          <div className="flex-1 min-w-0">
+            <h1
+              className="text-lg sm:text-2xl lg:text-3xl font-bold text-primary leading-tight tracking-wide"
+              style={{ fontFamily: '"Times New Roman", Georgia, serif' }}
+            >
+              TSL MEDICAL TRANSLATOR
+            </h1>
+            <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-[0.18em]">
+              Tanzanian Sign Language → Voice · Medical Communication
+            </p>
+          </div>
+          <img
+            src={ditLogo}
+            alt="Dar es Salaam Institute of Technology logo"
+            className="hidden sm:block h-12 sm:h-14 w-auto"
+          />
+        </div>
+      </div>
+
       <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10">
-        <div className="absolute -top-40 -left-40 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-primary/20 blur-3xl animate-float" />
+        <div className="absolute -top-40 -left-40 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-primary/10 blur-3xl animate-float" />
         <div
-          className="absolute -bottom-40 -right-40 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-accent/20 blur-3xl animate-float"
+          className="absolute -bottom-40 -right-40 w-72 sm:w-96 h-72 sm:h-96 rounded-full bg-accent/15 blur-3xl animate-float"
           style={{ animationDelay: "3s" }}
         />
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
-        <header className="text-center mb-5 sm:mb-8">
-          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3">
-            <img
-              src={ditLogo}
-              alt="Dar es Salaam Institute of Technology logo"
-              className="h-14 sm:h-20 w-auto drop-shadow-md"
-            />
-            <div className="text-left">
-              <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold leading-tight">
-                <span className="text-gradient">TSL Medical Translator</span>
-              </h1>
-              <p className="text-[10px] sm:text-sm text-foreground/70">
-                Tanzanian Sign Language to Voice · Medical Communication System
-              </p>
-            </div>
-          </div>
-        </header>
+
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2 space-y-4">
@@ -136,9 +156,13 @@ const Index = () => {
           </div>
         </div>
 
-        <footer className="mt-8 sm:mt-10 pt-6 border-t border-white/10 text-center text-xs sm:text-sm text-foreground/60">
-          <p className="font-semibold text-foreground/80">
-            Dar es Salaam Institute of Technology (DIT)
+        <footer className="mt-8 sm:mt-10 pt-6 border-t border-border text-center text-xs sm:text-sm text-muted-foreground space-y-1">
+          <p className="font-semibold text-primary">
+            CHAVITA · Kilakala Unit for the Deaf, Morogoro
+          </p>
+          <p>Developed at Dar es Salaam Institute of Technology (DIT) — Department of Computer Studies</p>
+          <p className="italic text-[11px]">
+            Sign vocabulary: "Kamusi ya Lugha ya Alama kwa Watoto" — Tanzatoto Foundation &amp; CHAVITA (2010 / 2014)
           </p>
         </footer>
       </div>

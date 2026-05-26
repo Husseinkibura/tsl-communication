@@ -4,63 +4,64 @@
 
 @layer base {
   :root {
-    /* DIT brand palette: sky blue #3FA9F5, yellow #FFD400, black, white */
-    --background: 210 40% 98%;
-    --foreground: 0 0% 8%;
+    /* CHAVITA brand palette: forest green #1f7a3a, Tanzania yellow #f5d300,
+       deep brown #6b3a1f (from the Tanzania-of-the-Deaf banner), white */
+    --background: 0 0% 100%;
+    --foreground: 140 40% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 8%;
+    --card-foreground: 140 40% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 8%;
+    --popover-foreground: 140 40% 10%;
 
-    --primary: 202 90% 60%;
+    --primary: 138 60% 28%;             /* CHAVITA green */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 202 95% 72%;
+    --primary-glow: 138 55% 42%;
 
-    --secondary: 50 100% 50%;
-    --secondary-foreground: 0 0% 8%;
+    --secondary: 50 100% 48%;           /* Tanzania yellow */
+    --secondary-foreground: 140 40% 10%;
 
-    --muted: 210 30% 94%;
-    --muted-foreground: 0 0% 35%;
+    --muted: 140 15% 95%;
+    --muted-foreground: 140 10% 35%;
 
-    --accent: 50 100% 50%;
-    --accent-foreground: 0 0% 8%;
+    --accent: 50 100% 48%;
+    --accent-foreground: 140 40% 10%;
 
-    --warning: 50 100% 48%;
+    --warning: 35 95% 50%;
     --warning-foreground: 0 0% 8%;
 
-    --destructive: 0 84% 55%;
+    --destructive: 0 75% 45%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 142 71% 42%;
+    --success: 138 60% 32%;
     --success-foreground: 0 0% 100%;
 
-    --border: 210 25% 85%;
-    --input: 210 25% 85%;
-    --ring: 202 90% 60%;
+    --border: 140 15% 88%;
+    --input: 140 15% 88%;
+    --ring: 138 60% 28%;
 
-    --radius: 1rem;
+    --radius: 0.5rem;
 
-    --gradient-bg: linear-gradient(135deg, hsl(210 50% 97%) 0%, hsl(202 70% 92%) 50%, hsl(50 100% 93%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(202 90% 55%) 0%, hsl(50 100% 50%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.75), hsl(202 60% 95% / 0.55));
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.35);
-    --shadow-elegant: 0 20px 60px -20px hsl(202 80% 30% / 0.25);
+    --gradient-bg: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(140 25% 97%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(138 60% 25%) 0%, hsl(138 55% 38%) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.85), hsl(140 25% 97% / 0.7));
+    --shadow-glow: 0 0 30px hsl(var(--primary) / 0.25);
+    --shadow-elegant: 0 12px 40px -16px hsl(138 60% 20% / 0.25);
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 8%;
-    --sidebar-primary: 202 90% 60%;
+    --sidebar-foreground: 140 40% 10%;
+    --sidebar-primary: 138 60% 28%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 50 100% 50%;
-    --sidebar-accent-foreground: 0 0% 8%;
-    --sidebar-border: 210 25% 85%;
-    --sidebar-ring: 202 90% 60%;
+    --sidebar-accent: 50 100% 48%;
+    --sidebar-accent-foreground: 140 40% 10%;
+    --sidebar-border: 140 15% 88%;
+    --sidebar-ring: 138 60% 28%;
   }
 
   .dark {
-    --background: 180 40% 8%;
-    --foreground: 180 20% 98%;
+    --background: 140 30% 8%;
+    --foreground: 140 15% 96%;
   }
 }
 
