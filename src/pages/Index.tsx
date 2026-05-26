@@ -10,7 +10,6 @@ import { GestureKey, Language } from "@/types";
 import { MEDICAL_PHRASES } from "@/utils/medicalPhrases";
 import { History } from "lucide-react";
 import { toast } from "sonner";
-import ditLogo from "@/assets/dit-logo.png";
 import chavitaLogo from "@/assets/chavita-logo.png";
 
 const Index = () => {
@@ -65,30 +64,25 @@ const Index = () => {
         </div>
       </div>
 
-      {/* CHAVITA-style header: white, logo left, serif wordmark */}
+      {/* CHAVITA-style header: logo left, serif wordmark */}
       <div className="border-b border-border bg-card">
         <div className="container mx-auto max-w-7xl px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-5">
           <img
             src={chavitaLogo}
             alt="CHAVITA — Tanzania Association of the Deaf logo"
-            className="h-12 sm:h-16 w-auto"
+            className="h-12 sm:h-16 w-auto flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
             <h1
-              className="text-lg sm:text-2xl lg:text-3xl font-bold text-primary leading-tight tracking-wide"
+              className="text-base sm:text-2xl lg:text-3xl font-bold text-primary leading-tight tracking-wide"
               style={{ fontFamily: '"Times New Roman", Georgia, serif' }}
             >
               TSL MEDICAL TRANSLATOR
             </h1>
-            <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-[0.18em]">
+            <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-[0.15em] mt-0.5">
               Tanzanian Sign Language → Voice · Medical Communication
             </p>
           </div>
-          <img
-            src={ditLogo}
-            alt="Dar es Salaam Institute of Technology logo"
-            className="hidden sm:block h-12 sm:h-14 w-auto"
-          />
         </div>
       </div>
 
@@ -159,10 +153,6 @@ const Index = () => {
         <footer className="mt-8 sm:mt-10 pt-6 border-t border-border text-center text-xs sm:text-sm text-muted-foreground space-y-1">
           <p className="font-semibold text-primary">
             CHAVITA · Kilakala Unit for the Deaf, Morogoro
-          </p>
-          <p>Developed at Dar es Salaam Institute of Technology (DIT) — Department of Computer Studies</p>
-          <p className="italic text-[11px]">
-            Sign vocabulary: "Kamusi ya Lugha ya Alama kwa Watoto" — Tanzatoto Foundation &amp; CHAVITA (2010 / 2014)
           </p>
         </footer>
       </div>

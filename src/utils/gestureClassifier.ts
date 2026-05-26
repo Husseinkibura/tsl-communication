@@ -235,28 +235,34 @@ function classifySingleHand(lm: Landmark[]): DetectionResult {
   const f = getFingerStates(lm);
   const orient = getOrientation(lm);
   const key = `${patternKey(f)}_${orient}`;
-  const gesture = SINGLE_HAND_MAP[key] ?? null;
-  if (!gesture) return { gesture: null, confidence: 0 };
 
-  // Check for closed pinch (thumb+index tips close) -> emergency override
+  // Closed pinch (thumb+index tips close) -> emergency override
   const thumbIndexDist = dist(lm[TIPS.thumb], lm[TIPS.index]);
   const palm = dist(lm[WRIST], lm[MCPS.middle]);
   if (palm > 0 && thumbIndexDist / palm < 0.25 && f.middle && f.ring && f.pinky) {
     return { gesture: "emergency", confidence: 0.9 };
   }
 
-  return { gesture, confidence: 0.85 };
+  let gesture = SINGLE_HAND_MAP[key];
+  if (!gesture) {
+    // Fallback: try any orientation for this finger pattern
+    const pat = patternKey(f);
+    for (const o of ["U", "D", "L", "R"] as const) {
+      const g = SINGLE_HAND_MAP[`${pat}_${o}`];
+      if (g) { gesture = g; break; }
+    }
+  }
+  if (!gesture) return { gesture: null, confidence: 0 };
+  return { gesture, confidence: 0.8 };
 }
 
 function classifyTwoHands(hands: Landmark[][]): DetectionResult {
-  // Use sum of extended fingers across both hands to pick from two-handed phrases
   const totals = hands.map(getFingerStates);
   const total = totals.reduce(
     (s, f) => s + f.thumb + f.index + f.middle + f.ring + f.pinky,
     0
   );
 
-  // Check if hands are crossed / close (stomach, pregnancy)
   const c0 = hands[0][MCPS.middle];
   const c1 = hands[1][MCPS.middle];
   const between = Math.hypot(c0.x - c1.x, c0.y - c1.y);
@@ -264,19 +270,9 @@ function classifyTwoHands(hands: Landmark[][]): DetectionResult {
   if (between < 0.25 && total <= 4) return { gesture: "pregnancy", confidence: 0.85 };
   if (between < 0.3 && total >= 8) return { gesture: "thank_you", confidence: 0.85 };
 
-  // Map by total extended fingers
   const TWO_HAND: Record<number, GestureKey> = {
-    0: "sleep",
-    1: "hungry",
-    2: "water",
-    3: "food",
-    4: "hand",
-    5: "leg",
-    6: "back",
-    7: "stomach",
-    8: "hospital",
-    9: "doctor",
-    10: "help",
+    0: "sleep", 1: "hungry", 2: "water", 3: "food", 4: "hand",
+    5: "leg", 6: "back", 7: "stomach", 8: "hospital", 9: "doctor", 10: "help",
   };
   return { gesture: TWO_HAND[total] ?? "help", confidence: 0.75 };
 }
@@ -290,15 +286,24 @@ export function classifyGesture(hands: Landmark[][]): DetectionResult {
 export class StabilityBuffer {
   private buffer: (GestureKey | null)[] = [];
   private size: number;
-  constructor(size = 5) {
+  constructor(size = 3) {
     this.size = size;
   }
   push(g: GestureKey | null): GestureKey | null {
     this.buffer.push(g);
     if (this.buffer.length > this.size) this.buffer.shift();
     if (this.buffer.length < this.size) return null;
-    const first = this.buffer[0];
-    return this.buffer.every((x) => x === first) ? first : null;
+    // Majority vote: return most common non-null gesture if it appears at least twice
+    const counts = new Map<GestureKey, number>();
+    for (const x of this.buffer) {
+      if (x) counts.set(x, (counts.get(x) ?? 0) + 1);
+    }
+    let best: GestureKey | null = null;
+    let bestN = 0;
+    for (const [k, v] of counts) {
+      if (v > bestN) { best = k; bestN = v; }
+    }
+    return bestN >= 2 ? best : null;
   }
   reset() {
     this.buffer = [];
