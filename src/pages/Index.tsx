@@ -154,10 +154,6 @@ const Index = () => {
           <p className="font-semibold text-primary">
             CHAVITA · Kilakala Unit for the Deaf, Morogoro
           </p>
-          <p>Developed at Dar es Salaam Institute of Technology (DIT) — Department of Computer Studies</p>
-          <p className="italic text-[11px]">
-            Sign vocabulary: "Kamusi ya Lugha ya Alama kwa Watoto" — Tanzatoto Foundation &amp; CHAVITA (2010 / 2014)
-          </p>
         </footer>
       </div>
     </div>
