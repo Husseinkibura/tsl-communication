@@ -31,7 +31,13 @@ const Index = () => {
     if (lastSpokenRef.current === gesture) return;
     lastSpokenRef.current = gesture;
     setHistory((h) => [gesture, ...h.filter((x) => x !== gesture)].slice(0, 5));
+    
     const phrase = MEDICAL_PHRASES[gesture];
+    if (!phrase) {
+      console.warn('Unknown gesture:', gesture);
+      return;
+    }
+    
     speak(language === "sw" ? phrase.swahili : phrase.english, language);
   }, [gesture, language, speak]);
 
@@ -130,6 +136,7 @@ const Index = () => {
                 <div className="flex flex-wrap gap-2">
                   {history.map((g, i) => {
                     const p = MEDICAL_PHRASES[g];
+                    if (!p) return null;
                     return (
                       <div
                         key={`${g}-${i}`}
