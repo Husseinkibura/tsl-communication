@@ -27,7 +27,7 @@ export const MEDICAL_PHRASES: Record<GestureKey, Phrase> = {
   dont_understand: {
     key: "dont_understand",  // ← Add this!
     label: "Don't Understand",
-    swahili: "Sielevi",
+    swahili: "Sielewi",
     english: "I don't understand",
     category: "social"
   },
