@@ -1,4 +1,4 @@
-// frontend/src/hooks/useGestureRecognition.ts
+// hooks/useGestureRecognition.ts
 import { useEffect, useRef, useState } from "react";
 import { GestureKey, Landmark } from "@/types";
 
@@ -36,10 +36,7 @@ export function useGestureRecognition(
   const rafRef = useRef<number | null>(null);
   const lastTimeRef = useRef(performance.now());
   const frameCountRef = useRef(0);
-  const lastGestureRef = useRef<GestureKey | null>(null);
   const isProcessingRef = useRef(false);
-  
-  // NEW: Detection stability tracking
   const detectionBufferRef = useRef<{ gesture: GestureKey | null; confidence: number }[]>([]);
   const stableGestureRef = useRef<GestureKey | null>(null);
   const gestureStartTimeRef = useRef<number>(0);
@@ -79,51 +76,36 @@ export function useGestureRecognition(
         confidence: data.confidence || 0 
       };
     } catch (err) {
-      console.error('❌ API error:', err);
+      console.error('API error:', err);
       return { gesture: null, confidence: 0 };
     } finally {
       isProcessingRef.current = false;
     }
   };
 
-  // NEW: Check if hand is in a stable position (not moving too much)
   const isHandStable = (landmarks: Landmark[][]): boolean => {
     if (landmarks.length === 0) return false;
-    
     const hand = landmarks[0];
     if (hand.length < 21) return false;
-    
-    // Check wrist position stability
-    const wrist = hand[0];
-    const wristX = wrist.x || 0;
-    const wristY = wrist.y || 0;
-    
-    // You can add more sophisticated stability detection here
-    // For now, return true if we have hand landmarks
     return true;
   };
 
-  // NEW: Determine if the gesture is intentionally held
   const isIntentionalGesture = (gestureKey: GestureKey | null, confidence: number): boolean => {
-    const CONSECUTIVE_DETECTIONS_REQUIRED = 8; // Need 8 consecutive frames
-    const MIN_CONFIDENCE = 0.55; // Higher threshold for intentional detection
-    const MIN_HOLD_TIME = 300; // Must hold for at least 300ms
+    const CONSECUTIVE_DETECTIONS_REQUIRED = 3;
+    const MIN_CONFIDENCE = 0.1;
+    const MIN_HOLD_TIME = 100;
     
     if (!gestureKey || confidence < MIN_CONFIDENCE) {
-      // Reset buffer if confidence drops
       detectionBufferRef.current = [];
       return false;
     }
     
-    // Add to buffer
     detectionBufferRef.current.push({ gesture: gestureKey, confidence });
     
-    // Keep only last N detections
     if (detectionBufferRef.current.length > CONSECUTIVE_DETECTIONS_REQUIRED) {
       detectionBufferRef.current.shift();
     }
     
-    // Check if we have enough consecutive detections of the SAME gesture
     const recentDetections = detectionBufferRef.current;
     if (recentDetections.length < CONSECUTIVE_DETECTIONS_REQUIRED) {
       return false;
@@ -133,7 +115,6 @@ export function useGestureRecognition(
     const allHighConfidence = recentDetections.every(d => d.confidence >= MIN_CONFIDENCE);
     
     if (allSameGesture && allHighConfidence) {
-      // Check if gesture has been held long enough
       if (stableGestureRef.current !== gestureKey) {
         stableGestureRef.current = gestureKey;
         gestureStartTimeRef.current = Date.now();
@@ -153,15 +134,12 @@ export function useGestureRecognition(
 
     (async () => {
       try {
-        console.log('📷 Loading MediaPipe...');
         await loadScript(MEDIAPIPE_HANDS);
         if (cancelled) return;
 
         if (!window.Hands) {
           throw new Error("MediaPipe Hands not available");
         }
-
-        console.log('✅ MediaPipe loaded, initializing...');
 
         const hands = new window.Hands({
           locateFile: (file: string) =>
@@ -171,8 +149,8 @@ export function useGestureRecognition(
         hands.setOptions({
           maxNumHands: 2,
           modelComplexity: 1,
-          minDetectionConfidence: 0.7, // Higher initial detection
-          minTrackingConfidence: 0.7,
+          minDetectionConfidence: 0.3,
+          minTrackingConfidence: 0.3,
         });
 
         hands.onResults(async (results: any) => {
@@ -181,29 +159,21 @@ export function useGestureRecognition(
           if (landmarks.length > 0 && isHandStable(landmarks)) {
             const result = await classifyWithPython(landmarks);
             
-            // Check if this is an intentional, stable gesture
             if (isIntentionalGesture(result.gesture, result.confidence)) {
-              console.log('🎯 INTENTIONAL DETECTION:', result.gesture, 'Confidence:', result.confidence);
               setGesture(result.gesture);
               setConfidence(result.confidence);
-              lastGestureRef.current = result.gesture;
               isSpeakingRef.current = true;
             } else {
-              // Gesture detected but not intentional yet
               if (!isSpeakingRef.current) {
-                // Only clear if we weren't already speaking
                 setGesture(null);
               }
             }
           } else {
-            // No hand detected
             if (!isSpeakingRef.current) {
-              // Reset if not actively speaking
               detectionBufferRef.current = [];
               stableGestureRef.current = null;
               setGesture(null);
               setConfidence(0);
-              lastGestureRef.current = null;
             }
           }
 
@@ -219,7 +189,6 @@ export function useGestureRecognition(
         handsRef.current = hands;
         setReady(true);
         setError(null);
-        console.log('✅ MediaPipe ready!');
 
         const process = async () => {
           if (cancelled) return;
@@ -233,7 +202,7 @@ export function useGestureRecognition(
         };
         process();
       } catch (e: any) {
-        console.error("❌ MediaPipe load error:", e);
+        console.error("MediaPipe load error:", e);
         setError("Failed to load hand tracking model.");
         setReady(false);
       }
@@ -250,13 +219,11 @@ export function useGestureRecognition(
     };
   }, [enabled, videoRef]);
 
-  // Reset speaking state after gesture is spoken
   useEffect(() => {
     if (gesture) {
-      // Reset the speaking flag after the gesture has been processed
       const timer = setTimeout(() => {
         isSpeakingRef.current = false;
-      }, 1000); // Give time for TTS to start
+      }, 2000);
       
       return () => clearTimeout(timer);
     }

@@ -1,3 +1,4 @@
+// pages/Index.tsx
 import { useEffect, useRef, useState } from "react";
 import { Camera } from "@/components/Camera";
 import { LanguageToggle } from "@/components/LanguageToggle";
@@ -7,7 +8,7 @@ import { useCamera } from "@/hooks/useCamera";
 import { useGestureRecognition } from "@/hooks/useGestureRecognition";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { GestureKey, Language } from "@/types";
-import { MEDICAL_PHRASES } from "@/utils/medicalPhrases";
+import { MEDICAL_PHRASES, PHRASES_LIST } from "@/utils/medicalPhrases";
 import { History } from "lucide-react";
 import { toast } from "sonner";
 import chavitaLogo from "@/assets/chavita-logo.png";
@@ -25,7 +26,6 @@ const Index = () => {
   const lastSpokenRef = useRef<GestureKey | null>(null);
   const cameraUnavailable = status === "error";
 
-  // Auto-speak only when camera detects a gesture
   useEffect(() => {
     if (!gesture) return;
     if (lastSpokenRef.current === gesture) return;
@@ -48,7 +48,6 @@ const Index = () => {
     });
   }, []);
 
-  // Keyboard shortcut: L to switch language
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return;
@@ -62,7 +61,6 @@ const Index = () => {
 
   return (
     <div className="min-h-screen text-foreground">
-      {/* CHAVITA-style top band */}
       <div className="bg-primary text-primary-foreground text-[11px] sm:text-xs">
         <div className="container mx-auto max-w-7xl px-3 sm:px-4 py-1.5 flex items-center justify-end">
           <span className="hidden sm:inline opacity-90">
@@ -71,7 +69,6 @@ const Index = () => {
         </div>
       </div>
 
-      {/* CHAVITA-style header: logo left, serif wordmark */}
       <div className="border-b border-border bg-card">
         <div className="container mx-auto max-w-7xl px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-5">
           <img
@@ -80,15 +77,9 @@ const Index = () => {
             className="h-10 sm:h-13 w-auto flex-shrink-0"
           />
           <div className="flex-1 min-w-0">
-            {/* <h1
-              className="text-base sm:text-2xl lg:text-3xl font-bold text-primary leading-tight tracking-wide"
-              style={{ fontFamily: '"Times New Roman", Georgia, serif' }}
-            >
-              TSL MEDICAL TRANSLATOR
-            </h1> */}
-           <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-[0.15em] mt-0.5 text-center">
+            <p className="text-[10px] sm:text-xs text-muted-foreground uppercase tracking-[0.15em] mt-0.5 text-center">
               Tanzanian Sign Language Voice · Medical Communication
-           </p>
+            </p>
           </div>
         </div>
       </div>
@@ -102,8 +93,6 @@ const Index = () => {
       </div>
 
       <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-7xl">
-
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           <div className="lg:col-span-2 space-y-4">
             <Camera

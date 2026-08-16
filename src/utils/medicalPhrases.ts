@@ -1,8 +1,8 @@
-// frontend/src/utils/medicalPhrases.ts
+// utils/medicalPhrases.ts
 import { GestureKey } from "@/types";
 
 export interface Phrase {
-  key: GestureKey;  // ← Add this!
+  key: GestureKey;
   label: string;
   swahili: string;
   english: string;
@@ -10,102 +10,104 @@ export interface Phrase {
 }
 
 export const MEDICAL_PHRASES: Record<GestureKey, Phrase> = {
-  thirsty: {
-    key: "thirsty",  // ← Add this!
-    label: "Thirsty",
-    swahili: "Nina kiu",
-    english: "I'm thirsty",
-    category: "needs"
-  },
-  pregnant: {
-    key: "pregnant",  // ← Add this!
-    label: "Pregnant",
-    swahili: "Nina mimba",
-    english: "I'm pregnant",
-    category: "medical"
-  },
-  dont_understand: {
-    key: "dont_understand",  // ← Add this!
-    label: "Don't Understand",
-    swahili: "Sielewi",
-    english: "I don't understand",
-    category: "social"
-  },
-  sick: {
-    key: "sick",  // ← Add this!
-    label: "Sick",
-    swahili: "Sijisikii vizuri",
-    english: "I don't feel well",
-    category: "symptoms"
-  },
-  please: {
-    key: "please",  // ← Add this!
-    label: "Please",
-    swahili: "Tafadhali",
-    english: "Please",
-    category: "social"
-  },
-  thank_you: {
-    key: "thank_you",  // ← Add this!
-    label: "Thank You",
-    swahili: "Asante sana",
-    english: "Thank you",
-    category: "social"
-  },
-  sorry: {
-    key: "sorry",  // ← Add this!
-    label: "Sorry",
-    swahili: "Samahani",
-    english: "Sorry",
-    category: "social"
-  },
-  hello: {
-    key: "hello",  // ← Add this!
-    label: "Hello",
-    swahili: "Habari",
-    english: "Hello",
-    category: "social"
-  },
   burned: {
-    key: "burned",  // ← Add this!
+    key: "burned",
     label: "Burned",
     swahili: "Nimeungua",
     english: "I've been burned",
     category: "medical"
   },
+  dont_understand: {
+    key: "dont_understand",
+    label: "Don't Understand",
+    swahili: "Sielewi",
+    english: "I don't understand",
+    category: "social"
+  },
   epilepsy: {
-    key: "epilepsy",  // ← Add this!
+    key: "epilepsy",
     label: "Epilepsy",
     swahili: "Nina kifafa",
     english: "I have epilepsy",
     category: "medical"
   },
+  hello: {
+    key: "hello",
+    label: "Hello",
+    swahili: "Habari",
+    english: "Hello",
+    category: "social"
+  },
   hello_respectful: {
-    key: "hello_respectful",  // ← Add this!
+    key: "hello_respectful",
     label: "Respectful Hello",
     swahili: "Shikamoo",
     english: "Hello (Respectful)",
     category: "social"
   },
+  help: {
+    key: "help",
+    label: "Help",
+    swahili: "Nahitaji msaada",
+    english: "I need help",
+    category: "help"
+  },
   nauseous: {
-    key: "nauseous",  // ← Add this!
+    key: "nauseous",
     label: "Nauseous",
     swahili: "Ninahisi kichefuchefu",
     english: "I feel nauseous",
     category: "symptoms"
   },
-  help: {
-    key: "help",  // ← Add this!
-    label: "Help",
-    swahili: "Nahitaji msaada",
-    english: "I need help",
-    category: "help"
+  please: {
+    key: "please",
+    label: "Please",
+    swahili: "Tafadhali",
+    english: "Please",
+    category: "social"
+  },
+  pregnant: {
+    key: "pregnant",
+    label: "Pregnant",
+    swahili: "Nina mimba",
+    english: "I'm pregnant",
+    category: "medical"
+  },
+  sick: {
+    key: "sick",
+    label: "Sick",
+    swahili: "Sijisikii vizuri",
+    english: "I don't feel well",
+    category: "symptoms"
+  },
+  sorry: {
+    key: "sorry",
+    label: "Sorry",
+    swahili: "Samahani",
+    english: "Sorry",
+    category: "social"
+  },
+  thank_you: {
+    key: "thank_you",
+    label: "Thank You",
+    swahili: "Asante sana",
+    english: "Thank you",
+    category: "social"
+  },
+  thirsty: {
+    key: "thirsty",
+    label: "Thirsty",
+    swahili: "Nina kiu",
+    english: "I'm thirsty",
+    category: "needs"
   }
 };
 
 export const PHRASES_LIST = Object.values(MEDICAL_PHRASES);
 export const GESTURE_KEYS = Object.keys(MEDICAL_PHRASES) as GestureKey[];
 
+// Also export as default for compatibility
+export default MEDICAL_PHRASES;
 
 
 

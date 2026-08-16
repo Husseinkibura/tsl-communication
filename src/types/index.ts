@@ -1,28 +1,31 @@
-// frontend/src/types/index.ts
+// types/index.ts
+export type GestureKey = 
+  | "burned"
+  | "dont_understand"
+  | "epilepsy"
+  | "hello"
+  | "hello_respectful"
+  | "help"
+  | "nauseous"
+  | "please"
+  | "pregnant"
+  | "sick"
+  | "sorry"
+  | "thank_you"
+  | "thirsty";
+
 export interface Landmark {
   x: number;
   y: number;
   z: number;
-  visibility?: number;
 }
 
-export type GestureKey = 
-  | 'thirsty' 
-  | 'pregnant' 
-  | 'dont_understand' 
-  | 'sick' 
-  | 'please' 
-  | 'thank_you' 
-  | 'sorry' 
-  | 'hello' 
-  | 'burned' 
-  | 'epilepsy' 
-  | 'hello_respectful' 
-  | 'nauseous' 
-  | 'help';
+export interface DetectionResult {
+  gesture: GestureKey | null;
+  confidence: number;
+}
 
-export type Language = 'sw' | 'en';
-
+export type Language = "sw" | "en";
 
 
 // export type GestureKey =

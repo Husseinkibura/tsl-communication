@@ -1,7 +1,4 @@
-
-
-
-
+// utils/gestureClassifier.ts
 import { GestureKey, Landmark, DetectionResult } from "@/types";
 
 const TIPS = { thumb: 4, index: 8, middle: 12, ring: 16, pinky: 20 };
@@ -29,8 +26,6 @@ function getFingerStates(lm: Landmark[]): FingerStates {
   };
 }
 
-// Orientation of hand based on wrist -> middle MCP vector
-// U=up, D=down, L=left, R=right
 function getOrientation(lm: Landmark[]): "U" | "D" | "L" | "R" {
   const dx = lm[MCPS.middle].x - lm[WRIST].x;
   const dy = lm[MCPS.middle].y - lm[WRIST].y;
@@ -42,193 +37,127 @@ function patternKey(f: FingerStates): string {
   return `${f.thumb}${f.index}${f.middle}${f.ring}${f.pinky}`;
 }
 
-// Map: `${pattern}_${orientation}` -> gesture
-// Pattern bits: thumb,index,middle,ring,pinky (1=extended)
 const SINGLE_HAND_MAP: Record<string, GestureKey> = {
-  // Index pointing
-  "01000_U": "headache",     // point up
-  "01000_D": "pain",         // point down
+  "01000_U": "headache",
+  "01000_D": "pain",
   "01000_L": "stop",
   "01000_R": "stop",
-
-  // Index + middle (V / peace)
   "01100_U": "help",
   "01100_D": "diabetes",
   "01100_L": "wait",
   "01100_R": "wait",
-
-  // Index + middle + ring (3)
   "01110_U": "doctor",
   "01110_D": "nurse",
   "01110_L": "nurse",
   "01110_R": "nurse",
-
-  // All four fingers (no thumb)
   "01111_U": "hospital",
   "01111_D": "vomit",
   "01111_L": "wheelchair",
   "01111_R": "wheelchair",
-
-  // Open palm (all 5)
   "11111_U": "hello",
   "11111_D": "blood",
   "11111_L": "goodbye",
   "11111_R": "goodbye",
-
-  // Fist (none)
   "00000_U": "yes",
   "00000_D": "fever",
   "00000_L": "yes",
   "00000_R": "yes",
-
-  // Thumb only (thumbs up/down)
   "10000_U": "happy",
   "10000_D": "sad",
   "10000_L": "happy",
   "10000_R": "happy",
-
-  // Pinky only
   "00001_U": "thirsty",
   "00001_D": "thirsty",
   "00001_L": "thirsty",
   "00001_R": "thirsty",
-
-  // Index + pinky (rock)
   "01001_U": "sick",
   "01001_D": "sick",
   "01001_L": "sick",
   "01001_R": "sick",
-
-  // Thumb + index + pinky (ILY / call)
   "11001_U": "ambulance",
   "11001_D": "ambulance",
   "11001_L": "ambulance",
   "11001_R": "ambulance",
-
-  // Thumb + pinky (phone / shaka)
   "10001_U": "please",
   "10001_D": "please",
   "10001_L": "please",
   "10001_R": "please",
-
-  // Thumb + index (L / gun)
   "11000_U": "injection",
   "11000_D": "injection",
   "11000_L": "injection",
   "11000_R": "injection",
-
-  // Thumb + index + middle
   "11100_U": "medicine",
   "11100_D": "medicine",
   "11100_L": "medicine",
   "11100_R": "medicine",
-
-  // Thumb + index + middle + ring
   "11110_U": "xray",
   "11110_D": "xray",
   "11110_L": "xray",
   "11110_R": "xray",
-
-  // Middle finger only
   "00100_U": "no",
   "00100_D": "no",
   "00100_L": "no",
   "00100_R": "no",
-
-  // Ring + pinky
   "00011_U": "tired",
   "00011_D": "tired",
   "00011_L": "tired",
   "00011_R": "tired",
-
-  // Middle + ring + pinky (no index)
   "00111_U": "sneeze",
   "00111_D": "sneeze",
   "00111_L": "sneeze",
   "00111_R": "sneeze",
-
-  // Index + middle + pinky
   "01101_U": "cough",
   "01101_D": "cough",
   "01101_L": "cough",
   "01101_R": "cough",
-
-  // Index + ring + pinky
   "01011_U": "dizzy",
   "01011_D": "dizzy",
   "01011_L": "dizzy",
   "01011_R": "dizzy",
-
-  // Thumb + middle
   "10100_U": "allergy",
   "10100_D": "allergy",
   "10100_L": "allergy",
   "10100_R": "allergy",
-
-  // Thumb + ring
   "10010_U": "bandage",
   "10010_D": "bandage",
   "10010_L": "bandage",
   "10010_R": "bandage",
-
-  // Thumb + index + middle + pinky
   "11101_U": "breathe",
   "11101_D": "breathe",
   "11101_L": "breathe",
   "11101_R": "breathe",
-
-  // Thumb + index + ring + pinky
   "11011_U": "pressure",
   "11011_D": "pressure",
   "11011_L": "pressure",
   "11011_R": "pressure",
-
-  // Thumb + middle + ring + pinky
   "10111_U": "surgery",
   "10111_D": "surgery",
   "10111_L": "surgery",
   "10111_R": "surgery",
-
-  // Index + middle + ring (no thumb, no pinky) handled above
-  // Ring only
   "00010_U": "ear",
   "00010_D": "ear",
   "00010_L": "ear",
   "00010_R": "ear",
-
-  // Thumb + middle + ring
   "10110_U": "heart",
   "10110_D": "heart",
   "10110_L": "heart",
   "10110_R": "heart",
-
-  // Thumb + ring + pinky
   "10011_U": "sorry",
   "10011_D": "sorry",
   "10011_L": "sorry",
   "10011_R": "sorry",
-
-  // Thumb + middle + pinky
   "10101_U": "hot",
   "10101_D": "cold",
   "10101_L": "hot",
   "10101_R": "hot",
-
-  // Index + middle + ring + pinky already (01111)
-  // Middle + ring
   "00110_U": "eye",
   "00110_D": "eye",
   "00110_L": "eye",
   "00110_R": "eye",
-
-  // Index + ring
   "01010_U": "nose",
   "01010_D": "nose",
   "01010_L": "nose",
   "01010_R": "nose",
-
-  // Index + pinky already
-  // Middle + pinky
   "00101_U": "mouth",
   "00101_D": "mouth",
   "00101_L": "mouth",
@@ -240,7 +169,6 @@ function classifySingleHand(lm: Landmark[]): DetectionResult {
   const orient = getOrientation(lm);
   const key = `${patternKey(f)}_${orient}`;
 
-  // Closed pinch (thumb+index tips close) -> emergency override
   const thumbIndexDist = dist(lm[TIPS.thumb], lm[TIPS.index]);
   const palm = dist(lm[WRIST], lm[MCPS.middle]);
   if (palm > 0 && thumbIndexDist / palm < 0.25 && f.middle && f.ring && f.pinky) {
@@ -249,7 +177,6 @@ function classifySingleHand(lm: Landmark[]): DetectionResult {
 
   let gesture = SINGLE_HAND_MAP[key];
   if (!gesture) {
-    // Fallback: try any orientation for this finger pattern
     const pat = patternKey(f);
     for (const o of ["U", "D", "L", "R"] as const) {
       const g = SINGLE_HAND_MAP[`${pat}_${o}`];
@@ -271,7 +198,7 @@ function classifyTwoHands(hands: Landmark[][]): DetectionResult {
   const c1 = hands[1][MCPS.middle];
   const between = Math.hypot(c0.x - c1.x, c0.y - c1.y);
 
-  if (between < 0.25 && total <= 4) return { gesture: "pregnancy", confidence: 0.85 };
+  if (between < 0.25 && total <= 4) return { gesture: "pregnant", confidence: 0.85 };
   if (between < 0.3 && total >= 8) return { gesture: "thank_you", confidence: 0.85 };
 
   const TWO_HAND: Record<number, GestureKey> = {
@@ -297,7 +224,6 @@ export class StabilityBuffer {
     this.buffer.push(g);
     if (this.buffer.length > this.size) this.buffer.shift();
     if (this.buffer.length < this.size) return null;
-    // Majority vote: return most common non-null gesture if it appears at least twice
     const counts = new Map<GestureKey, number>();
     for (const x of this.buffer) {
       if (x) counts.set(x, (counts.get(x) ?? 0) + 1);
